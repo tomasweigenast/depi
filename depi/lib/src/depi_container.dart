@@ -93,6 +93,10 @@ final class DepiContainer {
     return service.getValue(this) as T?;
   }
 
+  /// Retrieves the Options<[T]>
+  @pragma("vm:prefer-inline")
+  Options<T> options<T extends Object>() => service<Options<T>>();
+
   @pragma("vm:prefer-inline")
   T call<T>() => service<T>();
 
