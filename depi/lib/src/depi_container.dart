@@ -119,6 +119,9 @@ final class DepiContainer {
     service.value = null;
   }
 
+  /// Deletes all the registered services
+  void clear() => _services.clear();
+
   /// Retrieves a service by [T], throwing an exception if the service is not found.
   T service<T>() {
     final service = _services[T];
