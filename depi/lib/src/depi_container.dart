@@ -79,6 +79,25 @@ final class DepiContainer {
     _services[Options<O>] = _Service.lazy((container) => _OptionValue(configure(container)), true);
   }
 
+  /// Drops a service, deleting it.
+  ///
+  /// If the service is not registered, this does nothing.
+  void drop<T>() => _services.remove(T);
+
+  /// Invalidates the value created by a singleton, forcing the service to create a new
+  /// one the next time it is requested.
+  ///
+  /// If [T] is not registed or it is not a lazy singleton, an exception will be thrown.
+  void invalidate<T>() {
+    final service = _services[T];
+    if (service == null) {
+      throw ServiceNotFoundException(T);
+    }
+
+    if (service.getter == null) throw ArgumentError("Service $T is not registered as a lazy singleton.", T.toString());
+    service.value = null;
+  }
+
   /// Retrieves a service by [T], throwing an exception if the service is not found.
   T service<T>() {
     final service = _services[T];
