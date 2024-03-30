@@ -1,8 +1,12 @@
-import 'package:depi/src/exception.dart';
+import 'package:depi/depi.dart';
 
 part 'service.dart';
+part 'options_impl.dart';
 
 /// [DepiContainer] holds services and resolves instances when needed.
+///
+/// [DepiContainer] uses the options pattern, a pattern that came from C#. You can read more about
+/// it here: https://learn.microsoft.com/en-us/dotnet/core/extensions/options
 final class DepiContainer {
   final Map<Type, _Service> _services;
 
@@ -12,8 +16,9 @@ final class DepiContainer {
   /// Creates a new [DepiContainer].
   DepiContainer({bool throwIfDuplicated = false}) : this._create({}, throwIfDuplicated);
 
-  DepiContainer.scoped({DepiContainer? parent, bool throwIfDuplicated = false})
-      : this._create(parent == null ? {} : parent._cloneServices(), throwIfDuplicated);
+  /// Creates a clone of another [DepiContainer].
+  DepiContainer.clone(DepiContainer parent, {bool throwIfDuplicated = false})
+      : this._create(parent._cloneServices(), throwIfDuplicated);
 
   DepiContainer._create(this._services, this.throwIfDuplicated);
 
@@ -21,9 +26,11 @@ final class DepiContainer {
   ///
   /// When [T] is requested, if it is the first time it is called, [create] will execute
   /// and its value will be saved for subsequent calls.
+  ///
+  /// If [replace] is true and [T] is already registered, it will be replaced with this new service.
   void putSingleton<T>(ResolveFunc<T> create, {bool replace = false}) {
     if (!replace && throwIfDuplicated && _services.containsKey(T)) {
-      throw ArgumentError("Service $T already registered.", "T");
+      throw DuplicatedServiceException(T);
     }
 
     _services[T] = _Service.lazy(create, false);
@@ -32,9 +39,10 @@ final class DepiContainer {
   /// Registers a new transient value.
   ///
   /// Every time [T] is requested, [create] will execute and return its value.
+  /// If [replace] is true and [T] is already registered, it will be replaced with this new service.
   void putTransient<T>(ResolveFunc<T> create, {bool replace = false}) {
     if (!replace && throwIfDuplicated && _services.containsKey(T)) {
-      throw ArgumentError("Service $T already registered.", "T");
+      throw DuplicatedServiceException(T);
     }
 
     _services[T] = _Service.lazy(create, true);
@@ -43,12 +51,32 @@ final class DepiContainer {
   /// Registers a new singleton value.
   ///
   /// When [T] is requested, [value] is served.
+  /// If [replace] is true and [T] is already registered, it will be replaced with this new service.
   void putInstance<T>(T value, {bool replace = false}) {
     if (!replace && throwIfDuplicated && _services.containsKey(T)) {
-      throw ArgumentError("Service $T already registered.", "T");
+      throw DuplicatedServiceException(T);
     }
 
     _services[T] = _Service.value(value);
+  }
+
+  /// Configures the [O] Options by specifying a fixed value.
+  void configureValue<O extends Object>(O value) {
+    _services[Options<O>] = _Service.value(_OptionValue(value));
+  }
+
+  /// Configures the [O] Options by using a lazy callback
+  void configure<O extends Object>(O Function(DepiContainer container) configure) {
+    _services[Options<O>] = _Service.lazy((container) => _OptionValue(configure(container)), false);
+  }
+
+  /// Configures the [O] Options by using a lazy transient callback. A new instance
+  /// will be retrieved for the service every time it is requested.
+  ///
+  /// Keep in mind this will only work if the service that request this Options
+  /// is configured as a transient service.
+  void configureSnapshot<O extends Object>(O Function(DepiContainer container) configure) {
+    _services[Options<O>] = _Service.lazy((container) => _OptionValue(configure(container)), true);
   }
 
   /// Retrieves a service by [T], throwing an exception if the service is not found.
@@ -64,6 +92,9 @@ final class DepiContainer {
     if (service == null) return null;
     return service.getValue(this) as T?;
   }
+
+  @pragma("vm:prefer-inline")
+  T call<T>() => service<T>();
 
   Map<Type, _Service> _cloneServices() {
     final m = <Type, _Service>{};

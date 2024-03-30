@@ -1,6 +1,6 @@
 part of 'depi_container.dart';
 
-typedef ResolveFunc<T> = T Function(DepiContainer);
+typedef ResolveFunc<T> = T Function(DepiContainer services);
 
 final class _Service<T> {
   // Do not call this directly
