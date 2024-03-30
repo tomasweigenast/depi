@@ -80,8 +80,8 @@ container.configureValue<HttpServiceOptions>(HttpServiceOptions(baseUrl: "https:
 // Provide a fixed, lazy created, value:
 container.configure<HttpServiceOptions>((services) => HttpServiceOptions(baseUrl: "https:..."));
 
-// Provide a transient, lazy created, value. Here, a new HttpServiceOptions will be created every time it is needed.
-// Keep in mind this only will work if the service that request this is also transient.
+// Provide a transient, lazily created, value. Here, a new HttpServiceOptions will be created every time it is needed.
+// Keep in mind this only will work if the service that requests this is also transient.
 container.configureSnapshot<HttpServiceOptions>((services) => HttpServiceOptions(baseUrl: "https:..."));
 ```
 
@@ -90,22 +90,22 @@ Finally, to request an instance of `HttpServiceOptions`, you call:
 container.option<HttpServiceOptions>();
 ```
 
-If you are requesting it when creating a service, you can benefit of type inference and `DepiContainer` being a callable class and just call:
+If you are requesting it when creating a service, you can benefit from type inference and `DepiContainer` being a callable class and just call:
 ```dart
 container.registerSingleton<HttpService>((services) => HttpService(options: services()));
 ```
 > The same applies if you are requesting a service.
 
 #### Why `Options<T>` instead of just `T`?
-That is because you can create a `OptionsStream<T>`, which notifies every time a new `T` options is configured, **not** every time `T` changes. If you want to notify every time `T` changes, make sure `T` extends `ChangeNotifier`.
+That is because you can create an `OptionsStream<T>`, which notifies you every time a new `T` Options is configured, **not** every time `T` changes. 
 
 To register a new `OptionsStream<T>`, call:
 ```dart
 // Return an instance of T
 container.configureStream<T>((services) => T());
 ```
-If `T` extends `ChangeNotifier`, `Depi` will automatically listen to it changes and push a new version of `T`, notifying every service that already has a version of `T`.
-To use it, instead of passing `Options<T>` to your service constructor, pass a `OptionsStream<T>`:
+If `T` extends `ChangeNotifier`, `Depi` will automatically listen to its changes and push a new version of `T`, notifying every service that already has a version of `T`.
+To use it, instead of passing `Options<T>` to your service constructor, pass an `OptionsStream<T>`:
 ```dart
 class HttpService {
   HttpServiceOptions _options;
@@ -118,4 +118,12 @@ class HttpService {
 }
 ```
 
-> `OptionsStream` always provides an initial value you can use in your constructor. Also, `value` always contains the up to date value.
+> `OptionsStream` always provides an initial value you can use in your constructor. Also, `value` always contains the up-to-date value.
+
+If you want `DepiContainer` to also notify if your `ChangeNotifier` type changes, you can use:
+```dart
+container.configureStream<T>(
+  (services) => NotifierClass(),
+  listener: (notifierClassInstance) => notifierClassInstance.addListener,
+);
+```
