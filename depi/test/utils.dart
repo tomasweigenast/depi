@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:depi/depi.dart';
+import 'package:depi/src/options.dart';
 
 final random = Random.secure();
 int randomId() => random.nextInt(1 << 32);
@@ -41,4 +42,14 @@ final class JwtService {
     required this.httpService,
     required Options<JwtSettings> jwtSettings,
   }) : jwtSettings = jwtSettings.value;
+}
+
+final class ServiceB {
+  JwtSettings jwtSettings;
+
+  ServiceB({required OptionsStream<JwtSettings> settings}) : jwtSettings = settings.value {
+    settings.onChange((newOptions) {
+      jwtSettings = newOptions;
+    });
+  }
 }

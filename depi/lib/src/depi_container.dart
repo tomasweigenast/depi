@@ -1,7 +1,7 @@
 import 'package:depi/depi.dart';
 
-part 'service.dart';
 part 'options_impl.dart';
+part 'service.dart';
 
 /// [DepiContainer] holds services and resolves instances when needed.
 ///
@@ -67,7 +67,7 @@ final class DepiContainer {
 
   /// Configures the [O] Options by using a lazy callback
   void configure<O extends Object>(O Function(DepiContainer container) configure) {
-    _services[Options<O>] = _Service.lazy((container) => _OptionValue(configure(container)), false);
+    _services[Options<O>] = _Service.lazy((services) => _OptionValue(configure(services)), false);
   }
 
   /// Configures the [O] Options by using a lazy transient callback. A new instance
@@ -76,13 +76,34 @@ final class DepiContainer {
   /// Keep in mind this will only work if the service that request this Options
   /// is configured as a transient service.
   void configureSnapshot<O extends Object>(O Function(DepiContainer container) configure) {
-    _services[Options<O>] = _Service.lazy((container) => _OptionValue(configure(container)), true);
+    _services[Options<O>] = _Service.lazy((services) => _OptionValue(configure(services)), true);
+  }
+
+  /// Configures the [O] Options by using a lazy singleton callback.
+  ///
+  /// This Options will notify the services that are using it when it changes.
+  void configureStream<O extends Object>(O Function(DepiContainer container) configure) {
+    _services[OptionsStream<O>] = _Service.lazy((services) => _OptionStream(configure(services)), false);
+  }
+
+  /// Updates the Options value for [O] if it was registered as a [OptionStream], otherwise,
+  /// it will throw an exception.
+  void changeOptions<O extends Object>(O Function(O old) callback) {
+    final options = _services[OptionsStream<O>];
+    if (options == null) throw ServiceNotFoundException(O);
+    final optionsStream = options.value as _OptionStream<O>;
+    optionsStream._setValue(callback(optionsStream._currentValue));
   }
 
   /// Drops a service, deleting it.
   ///
   /// If the service is not registered, this does nothing.
-  void drop<T>() => _services.remove(T);
+  void drop<T>() {
+    final service = _services.remove(T);
+    if (service?.value is _OptionStream) {
+      (service!.value as _OptionStream).dispose();
+    }
+  }
 
   /// Invalidates the value created by a singleton, forcing the service to create a new
   /// one the next time it is requested.

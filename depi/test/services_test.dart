@@ -70,4 +70,17 @@ void main() {
 
     expect(container<JwtService>().jwtSettings, equals(JwtSettings(audience: "a", issuer: "b", password: "abc")));
   });
+
+  test("OptionsStream", () {
+    final container = DepiContainer();
+    container.putSingleton<ServiceB>((services) => ServiceB(settings: services()));
+    container.configureStream<JwtSettings>((container) => JwtSettings(audience: "a", issuer: "b", password: "abc"));
+
+    expect(container<ServiceB>().jwtSettings, equals(JwtSettings(audience: "a", issuer: "b", password: "abc")));
+
+    container.changeOptions<JwtSettings>(
+      (oldValue) => JwtSettings(password: oldValue.password, audience: oldValue.audience, issuer: "ccc"),
+    );
+    expect(container<ServiceB>().jwtSettings, equals(JwtSettings(audience: "a", issuer: "ccc", password: "abc")));
+  });
 }
