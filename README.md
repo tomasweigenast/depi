@@ -7,8 +7,8 @@ Depi is another dependency injection library that aims to match the functionalit
   - [Adding services](#addingservices)
   - [Retrieve services](#retrieveservices)
   - [Removing services](#removingservices)
-- [Service types](#service-types)
-- [Options pattern](#options-pattern)
+- [Service types](#servicetypes)
+- [Options pattern](#optionspattern)
 
 ## Getting Started<a name="gettingstarted"/>
 
@@ -41,12 +41,12 @@ container.invalidate<HttpService>();
 ```
 > This method will throw if the service is not found or the service is not a lazy singleton.
 
-## Service Types
+## Service Types<a name="servicetypes"/>
 Depi allows the creation of two service types:
 - **Singleton**: A single instance to a type. It may be _lazy_, which means it will be created the next time it is requested, or a simple _value_, which is created when the service is registered.
 - **Transient**: A new instance of the type will be created whenever the service is requested.
 
-## Options Pattern
+## Options Pattern<a name="optionspattern"/>
 The options pattern is something that comes from .NET Dependency Injection. You can read more about it [here](https://learn.microsoft.com/en-us/dotnet/core/extensions/options), but, in general, it provides encapsulation and separation of concerns.
 
 For example, if you create an `HttpService` you may want to allow the baseurl to be configured, so, you end up creating something like this:
