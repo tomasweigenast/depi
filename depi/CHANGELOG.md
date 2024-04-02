@@ -1,3 +1,8 @@
+## 1.1.1
+
+- Migrated to `lints` lint package.
+- Formatted code.
+
 ## 1.1.0
 
 - Add generator package `depi_generator`.

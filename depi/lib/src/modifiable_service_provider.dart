@@ -16,8 +16,9 @@ final class ModifiableServiceProvider extends _ServiceProviderImpl
   void invalidate<T>() {
     final service = _services[T];
     if (service == null) throw ServiceNotFoundException(T);
-    if (service.getter == null)
+    if (service.getter == null) {
       throw ArgumentError("Service $T is not a lazy singleton.", "T");
+    }
 
     service.value = null;
   }
