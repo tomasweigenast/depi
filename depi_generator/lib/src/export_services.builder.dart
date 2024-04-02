@@ -36,7 +36,11 @@ final class ExportServicesBuilder implements Builder {
       serviceClass.visitChildren(visitor);
 
       // Get the type of services
-      final serviceType = ServiceType.values[serviceLibrary.annotation.read("type").objectValue.getField("index")!.toIntValue()!];
+      final serviceType = ServiceType.values[serviceLibrary.annotation
+          .read("type")
+          .objectValue
+          .getField("index")!
+          .toIntValue()!];
 
       // Check for dependencies in the service
       final dependencies = <ServiceDependency>[];
@@ -48,7 +52,8 @@ final class ExportServicesBuilder implements Builder {
             typeId: visitor.typeId,
             parameterName: argument.name,
             serviceName: visitor.typeName,
-            isOptions: optionsType.isAssignableFromType(argument.type) || optionsStreamType.isAssignableFromType(argument.type),
+            isOptions: optionsType.isAssignableFromType(argument.type) ||
+                optionsStreamType.isAssignableFromType(argument.type),
           ),
         );
       }
@@ -74,7 +79,8 @@ final class ExportServicesBuilder implements Builder {
     }
 
     // Get concrete implementations
-    for (final implementationLibrary in lib.annotatedWith(implementationAnnotation)) {
+    for (final implementationLibrary
+        in lib.annotatedWith(implementationAnnotation)) {
       final implementationClass = implementationLibrary.element;
       if (implementationClass is! ClassElement) continue;
       if (!implementationClass.isConstructable) {
@@ -86,12 +92,17 @@ final class ExportServicesBuilder implements Builder {
       }
 
       // ignore this class if already marked as an implementation
-      if (implementationClass.isConstructable && services.containsKey(implementationClass.id)) {
+      if (implementationClass.isConstructable &&
+          services.containsKey(implementationClass.id)) {
         continue;
       }
 
       // Read environments where this is defined
-      final environments = implementationLibrary.annotation.read("environments").setValue.map((e) => e.toStringValue()!).toList();
+      final environments = implementationLibrary.annotation
+          .read("environments")
+          .setValue
+          .map((e) => e.toStringValue()!)
+          .toList();
 
       final serviceId = implementationClass.supertype!.element.id;
       final service = services[serviceId];
@@ -112,7 +123,9 @@ final class ExportServicesBuilder implements Builder {
     if (services.isNotEmpty) {
       buildStep.writeAsString(
         buildStep.inputId.changeExtension('.service.json'),
-        jsonEncode(services.values.map((value) => value.toJson()).toList(growable: false)),
+        jsonEncode(services.values
+            .map((value) => value.toJson())
+            .toList(growable: false)),
       );
     }
   }
