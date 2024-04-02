@@ -23,7 +23,8 @@ final class JwtSettings {
   final String audience;
   final String issuer;
 
-  JwtSettings({required this.password, required this.audience, required this.issuer});
+  JwtSettings(
+      {required this.password, required this.audience, required this.issuer});
 
   @override
   int get hashCode => Object.hash(password, audience, issuer);
@@ -31,7 +32,10 @@ final class JwtSettings {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is JwtSettings && other.password == password && other.audience == audience && other.issuer == issuer);
+      (other is JwtSettings &&
+          other.password == password &&
+          other.audience == audience &&
+          other.issuer == issuer);
 }
 
 final class JwtService {
@@ -47,7 +51,8 @@ final class JwtService {
 final class ServiceB {
   JwtSettings jwtSettings;
 
-  ServiceB({required OptionsStream<JwtSettings> settings}) : jwtSettings = settings.value {
+  ServiceB({required OptionsStream<JwtSettings> settings})
+      : jwtSettings = settings.value {
     settings.onChange((newOptions) {
       jwtSettings = newOptions;
     });

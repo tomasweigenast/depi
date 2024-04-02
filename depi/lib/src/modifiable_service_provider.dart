@@ -1,6 +1,7 @@
 part of 'service_provider_interface.dart';
 
-final class ModifiableServiceProvider extends _ServiceProviderImpl with _ServiceRegistrator {
+final class ModifiableServiceProvider extends _ServiceProviderImpl
+    with _ServiceRegistrator {
   ModifiableServiceProvider._internal(super.services);
 
   /// Drops a service, removing it from the list of available services.
@@ -15,7 +16,8 @@ final class ModifiableServiceProvider extends _ServiceProviderImpl with _Service
   void invalidate<T>() {
     final service = _services[T];
     if (service == null) throw ServiceNotFoundException(T);
-    if (service.getter == null) throw ArgumentError("Service $T is not a lazy singleton.", "T");
+    if (service.getter == null)
+      throw ArgumentError("Service $T is not a lazy singleton.", "T");
 
     service.value = null;
   }

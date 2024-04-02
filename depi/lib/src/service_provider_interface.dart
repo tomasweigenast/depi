@@ -20,19 +20,22 @@ abstract interface class ServiceProvider extends _ServiceHolder {
   void configureValue<O extends Object>(O value);
 
   /// Configures the [O] Options by using a lazy callback
-  void configure<O extends Object>(O Function(ServiceProvider container) configure);
+  void configure<O extends Object>(
+      O Function(ServiceProvider container) configure);
 
   /// Configures the [O] Options by using a lazy transient callback. A new instance
   /// will be retrieved for the service every time it is requested.
   ///
   /// Keep in mind this will only work if the service that request this Options
   /// is configured as a transient service.
-  void configureSnapshot<O extends Object>(O Function(ServiceProvider container) configure);
+  void configureSnapshot<O extends Object>(
+      O Function(ServiceProvider container) configure);
 
   /// Configures the [O] Options by using a lazy singleton callback.
   ///
   /// This Options will notify the services that are using it when it changes.
-  void configureStream<O extends Object>(O Function(ServiceProvider container) configure);
+  void configureStream<O extends Object>(
+      O Function(ServiceProvider container) configure);
 
   /// Updates the Options value for [O] if it was registered as a [OptionStream], otherwise,
   /// it will throw an exception.

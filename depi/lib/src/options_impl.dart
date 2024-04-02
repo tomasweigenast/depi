@@ -19,7 +19,8 @@ final class _OptionStream<T extends Object> implements OptionsStream<T> {
   T get value => _currentValue;
 
   @override
-  void onChange(void Function(T newOptions) callback) => callbacks.add(callback);
+  void onChange(void Function(T newOptions) callback) =>
+      callbacks.add(callback);
 
   void _setValue(T newValue) {
     _currentValue = newValue;

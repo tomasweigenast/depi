@@ -5,7 +5,8 @@ import 'package:depi/depi.dart';
 void main() {
   final container = ServiceCollection();
   container.putSingleton((services) => HttpService());
-  container.putSingleton((services) => AnAPI(httpService: services<HttpService>()));
+  container
+      .putSingleton((services) => AnAPI(httpService: services<HttpService>()));
   container.putTransient(
     (services) => JwtService(
       jwtSettings: services(),
@@ -14,7 +15,8 @@ void main() {
   );
 
   final serviceProvider = container.build();
-  serviceProvider.configure<JwtSettings>((container) => JwtSettings(audience: "a", issuer: "a", password: "123"));
+  serviceProvider.configure<JwtSettings>(
+      (container) => JwtSettings(audience: "a", issuer: "a", password: "123"));
 
   final jwtService = serviceProvider.service<JwtService>();
   print(jwtService.jwtSettings);
@@ -40,7 +42,8 @@ final class JwtSettings {
   final String audience;
   final String issuer;
 
-  JwtSettings({required this.password, required this.audience, required this.issuer});
+  JwtSettings(
+      {required this.password, required this.audience, required this.issuer});
 
   @override
   int get hashCode => Object.hash(password, audience, issuer);
@@ -48,7 +51,10 @@ final class JwtSettings {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is JwtSettings && other.password == password && other.audience == audience && other.issuer == issuer);
+      (other is JwtSettings &&
+          other.password == password &&
+          other.audience == audience &&
+          other.issuer == issuer);
 }
 
 final class JwtService {
