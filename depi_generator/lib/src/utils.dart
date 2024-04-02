@@ -8,10 +8,16 @@ const optionsType = TypeChecker.fromRuntime(Options);
 const optionsStreamType = TypeChecker.fromRuntime(OptionsStream);
 
 List<String> getImplementationAnnotationValues(Element element) {
-  final annotations = implementationAnnotation.annotationsOf(element, throwOnUnresolved: false);
+  final annotations =
+      implementationAnnotation.annotationsOf(element, throwOnUnresolved: false);
   final environments = annotations
-      .map((e) => e.getField("environments")!.toSetValue()!.map((e) => e.toStringValue()!).toList())
-      .fold(<String>[], (previousValue, element) => [...previousValue, ...element]);
+      .map((e) => e
+          .getField("environments")!
+          .toSetValue()!
+          .map((e) => e.toStringValue()!)
+          .toList())
+      .fold(<String>[],
+          (previousValue, element) => [...previousValue, ...element]);
 
   if (environments.isEmpty) {
     environments.add(kDefaultEnvironment);

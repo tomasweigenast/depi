@@ -8,10 +8,10 @@ import '../services/single_class.dart';
 part 'service_collection.depi.dart';
 
 @serviceRegistrator
-final class MyServiceProvider extends _$MyServiceProvider {
-  // MyServiceProvider.development() : super._development();
-  MyServiceProvider.production() : super._production();
-  MyServiceProvider();
+final class MyServiceCollection extends _$MyServiceCollection {
+  MyServiceCollection.development() : super._development();
+  MyServiceCollection.production() : super._production();
+  MyServiceCollection();
 
   @override
   void configureServices(ServiceProvider serviceProvider) {}

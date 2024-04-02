@@ -2,8 +2,12 @@
 
 part of 'service_collection.dart';
 
-abstract base class _$MyServiceProvider extends ServiceCollection {
-  _$MyServiceProvider._production() {
+abstract base class _$MyServiceCollection extends ServiceCollection {
+  _$MyServiceCollection._development() {
+    putTransient<AbstractService>((services) => ConcreteB());
+    putSingleton<ServiceD>((services) => ServiceDImplementation());
+  }
+  _$MyServiceCollection._production() {
     putTransient<AbstractService>((services) => ConcreteA());
     putSingleton<ServiceB>((services) => ServiceBImplementation());
     putSingleton<ServiceE>((services) => ServiceE());
@@ -14,14 +18,12 @@ abstract base class _$MyServiceProvider extends ServiceCollection {
           options: services(),
         ));
   }
-  _$MyServiceProvider() {
+  _$MyServiceCollection() {
     putSingleton<ServiceA>((services) => ServiceA());
     putSingleton<ServiceB>((services) => ServiceB());
     putSingleton<ServiceE>((services) => ServiceE());
   }
-
   void configureServices(ServiceProvider serviceProvider);
-
   @override
   ServiceProvider build() {
     final serviceProvider = super.build();

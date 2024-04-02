@@ -26,9 +26,13 @@ final class ServiceDefinition {
         path: map["path"] as String,
         name: map["name"] as String,
         serviceType: ServiceType.values[map["serviceType"] as int],
-        dependencies: (map["dependencies"] as Iterable).map((e) => ServiceDependency.fromJson(e as Map)).toList(),
+        dependencies: (map["dependencies"] as Iterable)
+            .map((e) => ServiceDependency.fromJson(e as Map))
+            .toList(),
         isBase: map["isBase"] as bool,
-        implementations: (map["implementations"] as Iterable).map((e) => ServiceImplementation.fromJson(e as Map)).toList(),
+        implementations: (map["implementations"] as Iterable)
+            .map((e) => ServiceImplementation.fromJson(e as Map))
+            .toList(),
       );
 
   Map toJson() => {
@@ -36,9 +40,11 @@ final class ServiceDefinition {
         "path": path,
         "name": name,
         "serviceType": serviceType.index,
-        "dependencies": dependencies.map((e) => e.toJson()).toList(growable: false),
+        "dependencies":
+            dependencies.map((e) => e.toJson()).toList(growable: false),
         "isBase": isBase,
-        "implementations": implementations.map((e) => e.toJson()).toList(growable: false),
+        "implementations":
+            implementations.map((e) => e.toJson()).toList(growable: false),
       };
 }
 
@@ -48,7 +54,11 @@ final class ServiceDependency {
   final String serviceName;
   final bool isOptions;
 
-  ServiceDependency({required this.typeId, required this.parameterName, required this.serviceName, required this.isOptions});
+  ServiceDependency(
+      {required this.typeId,
+      required this.parameterName,
+      required this.serviceName,
+      required this.isOptions});
 
   factory ServiceDependency.fromJson(Map map) => ServiceDependency(
         typeId: map["typeId"] as int,
@@ -70,11 +80,15 @@ final class ServiceImplementation {
   final List<String> environments;
   final String typeName;
 
-  ServiceImplementation({required this.typeId, required this.typeName, required this.environments});
+  ServiceImplementation(
+      {required this.typeId,
+      required this.typeName,
+      required this.environments});
 
   factory ServiceImplementation.fromJson(Map map) => ServiceImplementation(
         typeId: map["typeId"] as int,
-        environments: (map["environments"] as Iterable).map((e) => e as String).toList(),
+        environments:
+            (map["environments"] as Iterable).map((e) => e as String).toList(),
         typeName: map["typeName"] as String,
       );
 

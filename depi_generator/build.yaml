@@ -25,6 +25,5 @@ builders:
     import: "package:depi_generator/builder.dart"
     builder_factories: ["collectionGenerator"]
     build_extensions: { ".dart": [".depi.dart"] }
-    # required_inputs: [".service.json"]
     auto_apply: dependents
     build_to: source
