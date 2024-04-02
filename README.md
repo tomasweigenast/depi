@@ -192,9 +192,9 @@ To create a new environment, simply define a new named constructor:
 part of 'my_container.depi.dart';
 
 @serviceRegistrator
-final class MyServiceProvider extends _$MyServiceProvider {
-  MyServiceProvider.development() : super.development();
-  MyServiceProvider.production() : super.production();
+final class MyServiceContainer extends _$MyServiceContainer {
+  MyServiceContainer.development() : super._development();
+  MyServiceContainer.production() : super._production();
 }
 ```
 
@@ -264,3 +264,9 @@ final class ServiceCOptions {
 ### Generating code
 
 Finally, run `dart run build_runner build` to generate the code. To use the container, simply create a new instance of your ServiceRegistrator.
+
+### Using the code
+Your `MyServiceContainer` is an implementation of `ServiceContainer`, so you can create it like so:
+```dart
+final serviceProvider = MyServiceContainer.production().build();
+```
