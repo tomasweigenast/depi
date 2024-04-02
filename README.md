@@ -119,11 +119,3 @@ class HttpService {
 ```
 
 > `OptionsStream` always provides an initial value you can use in your constructor. Also, `value` always contains the up-to-date value.
-
-If you want `DepiContainer` to also notify if your `ChangeNotifier` type changes, you can use:
-```dart
-container.configureStream<T>(
-  (services) => NotifierClass(),
-  listener: (notifierClassInstance) => notifierClassInstance.addListener,
-);
-```

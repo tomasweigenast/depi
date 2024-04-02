@@ -1,0 +1,30 @@
+targets:
+  $default:
+    builders:
+      depi_generator:scan_services_generator:
+        enabled: true
+        generate_for:
+          include:
+            - "example/**.dart"
+      depi_generator:service_collection_generator:
+        enabled: true
+        generate_for:
+          include:
+            - "example/**"
+
+builders:
+  scan_services_generator:
+    import: "package:depi_generator/builder.dart"
+    runs_before: ["depi_generator:service_collection_generator"]
+    builder_factories: ["exportServices"]
+    build_extensions: { ".dart": [".service.json"] }
+    auto_apply: dependents
+    build_to: cache
+
+  service_collection_generator:
+    import: "package:depi_generator/builder.dart"
+    builder_factories: ["collectionGenerator"]
+    build_extensions: { ".dart": [".depi.dart"] }
+    # required_inputs: [".service.json"]
+    auto_apply: dependents
+    build_to: source

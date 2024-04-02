@@ -3,16 +3,20 @@ import 'dart:math';
 import 'package:depi/depi.dart';
 
 void main() {
-  final container = DepiContainer();
+  final container = ServiceCollection();
   container.putSingleton((services) => HttpService());
   container.putSingleton((services) => AnAPI(httpService: services<HttpService>()));
-  container.putTransient((services) => JwtService(
-        jwtSettings: services.options<JwtSettings>(),
-        httpService: services<HttpService>(),
-      ));
-  container.configure<JwtSettings>((container) => JwtSettings(audience: "a", issuer: "a", password: "123"));
+  container.putTransient(
+    (services) => JwtService(
+      jwtSettings: services(),
+      httpService: services(),
+    ),
+  );
 
-  final jwtService = container.service<JwtService>();
+  final serviceProvider = container.build();
+  serviceProvider.configure<JwtSettings>((container) => JwtSettings(audience: "a", issuer: "a", password: "123"));
+
+  final jwtService = serviceProvider.service<JwtService>();
   print(jwtService.jwtSettings);
 }
 

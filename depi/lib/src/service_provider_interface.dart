@@ -13,7 +13,7 @@ part 'service_provider_impl.dart';
 /// it here: https://learn.microsoft.com/en-us/dotnet/core/extensions/options.
 ///
 /// To create a new [ServiceProvider], use [ServiceCollection].
-abstract class ServiceProvider extends _ServiceHolder {
+abstract interface class ServiceProvider extends _ServiceHolder {
   ServiceProvider._(super.services);
 
   /// Configures the [O] Options by specifying a fixed value.

@@ -1,6 +1,6 @@
 part of 'service_provider_interface.dart';
 
-final class ServiceCollection extends _ServiceHolder with _ServiceRegistrator {
+class ServiceCollection extends _ServiceHolder with _ServiceRegistrator {
   ServiceCollection() : super({});
 
   /// Builds a [ServiceProvider] with the registered services.
