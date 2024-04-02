@@ -1,4 +1,4 @@
-part of 'depi_container.dart';
+part of 'service_provider_interface.dart';
 
 final class _OptionValue<T extends Object> implements Options<T> {
   final T _value;

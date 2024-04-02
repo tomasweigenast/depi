@@ -1,86 +1,83 @@
-import 'package:depi/src/depi_container.dart';
+import 'package:depi/depi.dart';
 import 'package:test/test.dart';
 
 import 'utils.dart';
 
 void main() {
   test("throw if service not found", () {
-    final container = DepiContainer();
+    final container = ServiceCollection().build();
     expect(() => container.service<HttpService>(), throwsException);
   });
 
   test("null if service not found", () {
-    final container = DepiContainer();
+    final container = ServiceCollection().build();
     expect(container.maybeService<HttpService>(), isNull);
   });
 
   test("register and get a singleton", () {
-    final container = DepiContainer();
-    container.putSingleton<HttpService>((p0) => HttpService());
+    final container = ServiceCollection()..putSingleton<HttpService>((p0) => HttpService());
 
-    expect(container.service<HttpService>().id, equals(container.service<HttpService>().id));
+    final serviceProvider = container.build();
+
+    expect(serviceProvider.service<HttpService>().id, equals(serviceProvider.service<HttpService>().id));
   });
 
   test("register and get an instance", () {
-    final container = DepiContainer();
-    container.putInstance<HttpService>(HttpService());
+    final container = ServiceCollection()..putInstance<HttpService>(HttpService());
+    final serviceProvider = container.build();
 
-    expect(container.service<HttpService>().id, equals(container.service<HttpService>().id));
+    expect(serviceProvider.service<HttpService>().id, equals(serviceProvider.service<HttpService>().id));
   });
 
   test("register and get a transient", () {
-    final container = DepiContainer();
-    container.putTransient<HttpService>((p0) => HttpService());
+    final container = ServiceCollection()..putTransient<HttpService>((p0) => HttpService());
 
-    expect(container.service<HttpService>().id, isNot(equals(container.service<HttpService>().id)));
+    final serviceProvider = container.build();
+
+    expect(serviceProvider.service<HttpService>().id, isNot(equals(serviceProvider.service<HttpService>().id)));
   });
 
-  test("throw if duplicated", () {
-    final container = DepiContainer(throwIfDuplicated: true);
-    container.putTransient<HttpService>((p0) => HttpService());
-    expect(() => container.putTransient<HttpService>((p0) => HttpService()), throwsException);
-    expect(() => container.putSingleton<HttpService>((p0) => HttpService()), throwsException);
-  });
+  test("ModifiableServiceProvider", () {
+    final container = ServiceCollection()..putTransient<HttpService>((p0) => HttpService());
+    final serviceProvider = container.buildModifiable();
 
-  test("replace if duplicated", () {
-    final container = DepiContainer();
-    container.putInstance<HttpService>(HttpService());
-    final firstId = container.service<HttpService>().id;
-    container.putInstance<HttpService>(HttpService());
-    final secondId = container.service<HttpService>().id;
-
-    expect(firstId, isNot(equals(secondId)));
+    expect(() => serviceProvider.putSingleton<AnAPI>((services) => AnAPI(httpService: services())), isNot(throwsA(isException)));
   });
 
   test("depend on services", () {
-    final container = DepiContainer();
-    container.putSingleton<AnAPI>((services) => AnAPI(httpService: services<HttpService>()));
-    container.putSingleton<HttpService>((services) => HttpService());
+    final container = ServiceCollection()
+      ..putSingleton<AnAPI>((services) => AnAPI(httpService: services<HttpService>()))
+      ..putSingleton<HttpService>((services) => HttpService());
 
-    expect(() => container.service<AnAPI>(), isNot(throwsException));
-    expect(container.service<AnAPI>().httpService.id, equals(container.service<HttpService>().id));
-    expect(container.service<AnAPI>().httpService.hashCode, equals(container.service<HttpService>().hashCode));
+    final serviceProvider = container.build();
+
+    expect(() => serviceProvider.service<AnAPI>(), isNot(throwsException));
+    expect(serviceProvider.service<AnAPI>().httpService.id, equals(serviceProvider.service<HttpService>().id));
+    expect(serviceProvider.service<AnAPI>().httpService.hashCode, equals(serviceProvider.service<HttpService>().hashCode));
   });
 
   test("options pattern", () {
-    final container = DepiContainer();
-    container.putSingleton<HttpService>((services) => HttpService());
-    container.putSingleton<JwtService>((services) => JwtService(httpService: services(), jwtSettings: services()));
-    container.configure<JwtSettings>((container) => JwtSettings(audience: "a", issuer: "b", password: "abc"));
+    final container = ServiceCollection()
+      ..putSingleton<HttpService>((services) => HttpService())
+      ..putSingleton<JwtService>((services) => JwtService(httpService: services(), jwtSettings: services()));
 
-    expect(container<JwtService>().jwtSettings, equals(JwtSettings(audience: "a", issuer: "b", password: "abc")));
+    final serviceProvider = container.build();
+    serviceProvider.configure<JwtSettings>((container) => JwtSettings(audience: "a", issuer: "b", password: "abc"));
+
+    expect(serviceProvider<JwtService>().jwtSettings, equals(JwtSettings(audience: "a", issuer: "b", password: "abc")));
   });
 
   test("OptionsStream", () {
-    final container = DepiContainer();
-    container.putSingleton<ServiceB>((services) => ServiceB(settings: services()));
-    container.configureStream<JwtSettings>((container) => JwtSettings(audience: "a", issuer: "b", password: "abc"));
+    final container = ServiceCollection()..putSingleton<ServiceB>((services) => ServiceB(settings: services()));
 
-    expect(container<ServiceB>().jwtSettings, equals(JwtSettings(audience: "a", issuer: "b", password: "abc")));
+    final serviceProvider = container.build();
+    serviceProvider.configureStream<JwtSettings>((container) => JwtSettings(audience: "a", issuer: "b", password: "abc"));
 
-    container.changeOptions<JwtSettings>(
+    expect(serviceProvider<ServiceB>().jwtSettings, equals(JwtSettings(audience: "a", issuer: "b", password: "abc")));
+
+    serviceProvider.changeOptions<JwtSettings>(
       (oldValue) => JwtSettings(password: oldValue.password, audience: oldValue.audience, issuer: "ccc"),
     );
-    expect(container<ServiceB>().jwtSettings, equals(JwtSettings(audience: "a", issuer: "ccc", password: "abc")));
+    expect(serviceProvider<ServiceB>().jwtSettings, equals(JwtSettings(audience: "a", issuer: "ccc", password: "abc")));
   });
 }

@@ -1,6 +1,6 @@
-part of 'depi_container.dart';
+part of 'service_provider_interface.dart';
 
-typedef ResolveFunc<T> = T Function(DepiContainer services);
+typedef ResolveFunc<T> = T Function(ServiceProvider services);
 
 final class _Service<T> {
   // Do not call this directly
@@ -13,7 +13,7 @@ final class _Service<T> {
 
   /// Resolves the value
   @pragma("vm:prefer-inline")
-  T getValue(DepiContainer container) {
+  T getValue(ServiceProvider container) {
     if (transient) return getter!(container);
 
     value ??= getter!(container);

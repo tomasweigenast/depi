@@ -3,6 +3,7 @@
 /// It provides the Options pattern so you can configure your services using classes.
 library;
 
-export 'src/depi_container.dart';
+export 'src/annotations.dart';
 export 'src/exception.dart';
 export 'src/options.dart';
+export 'src/service_provider_interface.dart';
