@@ -21,7 +21,9 @@ final class ExportServicesBuilder implements Builder {
     final resolver = buildStep.resolver;
     if (!await resolver.isLibrary(buildStep.inputId)) return;
     final lib = LibraryReader(await buildStep.inputLibrary);
-    final services = <int, ServiceDefinition>{};
+
+    final discoveredServices = <String, ServiceDefinition>{};
+    final implementations = <ServiceImplementation>[];
 
     // Get services
     for (final serviceLibrary in lib.annotatedWith(serviceAnnotation)) {
@@ -29,18 +31,14 @@ final class ExportServicesBuilder implements Builder {
       if (serviceClass is! ClassElement) continue;
 
       if (serviceClass.isMixinClass) {
-        throw "Mixin classes cannot be services. Conflict wiht ${serviceClass.displayName}.";
+        throw "Mixin classes cannot be services. Conflict with ${serviceClass.displayName}.";
       }
 
       final visitor = _ElementVisitor();
       serviceClass.visitChildren(visitor);
 
       // Get the type of services
-      final serviceType = ServiceType.values[serviceLibrary.annotation
-          .read("type")
-          .objectValue
-          .getField("index")!
-          .toIntValue()!];
+      final serviceType = ServiceType.values[serviceLibrary.annotation.read("type").objectValue.getField("index")!.toIntValue()!];
 
       // Check for dependencies in the service
       final dependencies = <ServiceDependency>[];
@@ -52,80 +50,86 @@ final class ExportServicesBuilder implements Builder {
             typeId: visitor.typeId,
             parameterName: argument.name,
             serviceName: visitor.typeName,
-            isOptions: optionsType.isAssignableFromType(argument.type) ||
-                optionsStreamType.isAssignableFromType(argument.type),
+            isOptions: optionsType.isAssignableFromType(argument.type) || optionsStreamType.isAssignableFromType(argument.type),
+          ),
+        );
+      }
+      // If the class can be instantiated, it must be an implementation
+      if (serviceClass.isConstructable) {
+        implementations.add(
+          ServiceImplementation(
+            typeId: serviceClass.id,
+            typeName: serviceClass.displayName,
+            forServiceName: serviceClass.displayName,
+            environments: getImplementationAnnotationValues(serviceClass),
           ),
         );
       }
 
       // create the definition
-      services[serviceClass.id] = ServiceDefinition(
-        id: serviceClass.id,
+      discoveredServices[serviceClass.name] = ServiceDefinition(
         path: buildStep.inputId.path,
         name: serviceClass.displayName,
         isBase: !serviceClass.isConstructable,
         serviceType: serviceType,
         dependencies: dependencies,
-        implementations: [
-          // If the class can be instantiated, it must be an implementation
-          if (serviceClass.isConstructable)
-            ServiceImplementation(
-              typeId: serviceClass.id,
-              typeName: serviceClass.displayName,
-              environments: getImplementationAnnotationValues(serviceClass),
-            ),
-        ],
       );
     }
 
     // Get concrete implementations
-    for (final implementationLibrary
-        in lib.annotatedWith(implementationAnnotation)) {
+    for (final implementationLibrary in lib.annotatedWith(implementationAnnotation)) {
       final implementationClass = implementationLibrary.element;
+      final implementationAnnotation = implementationLibrary.annotation;
       if (implementationClass is! ClassElement) continue;
       if (!implementationClass.isConstructable) {
         throw "Implementations must be instantiable. Conflict with ${implementationClass.displayName}.";
       }
 
-      if (implementationClass.supertype == null) {
-        throw "Implementations must have a superclass that is the service being implemented. Conflict with ${implementationClass.displayName}.";
-      }
-
       // ignore this class if already marked as an implementation
-      if (implementationClass.isConstructable &&
-          services.containsKey(implementationClass.id)) {
+      if (implementationClass.isConstructable && discoveredServices.containsKey(implementationClass.displayName)) {
         continue;
       }
 
-      // Read environments where this is defined
-      final environments = implementationLibrary.annotation
-          .read("environments")
-          .setValue
-          .map((e) => e.toStringValue()!)
-          .toList();
+      String? forServiceName;
+      try {
+        final baseServiceType = implementationAnnotation.read("type").typeValue.element!.displayName;
+        forServiceName = baseServiceType;
+      } catch (_) {}
 
-      final serviceId = implementationClass.supertype!.element.id;
-      final service = services[serviceId];
-
-      if (service == null) {
-        throw "Service ${implementationClass.supertype!.element.displayName} not found. Class probably not marked as @Service";
+      // try to get service from interface
+      if (forServiceName == null &&
+          implementationClass.supertype?.isDartCoreObject == true &&
+          implementationClass.interfaces.isNotEmpty) {
+        try {
+          final interface = implementationClass.interfaces.single;
+          forServiceName = interface.element.displayName;
+        } catch (_) {
+          throw "Unable to know which service is ${implementationClass.displayName} implementation for. Specify the service type in the Implementation attribute.";
+        }
+      } else {
+        forServiceName = implementationClass.supertype!.element.displayName;
       }
 
-      service.implementations.add(
+      // Read environments where this is defined
+      final environments = implementationAnnotation.read("environments").setValue.map((e) => e.toStringValue()!).toList();
+
+      implementations.add(
         ServiceImplementation(
           typeId: implementationClass.id,
           typeName: implementationClass.displayName,
+          forServiceName: forServiceName,
           environments: environments,
         ),
       );
     }
 
-    if (services.isNotEmpty) {
+    if (discoveredServices.isNotEmpty || implementations.isNotEmpty) {
       buildStep.writeAsString(
         buildStep.inputId.changeExtension('.service.json'),
-        jsonEncode(services.values
-            .map((value) => value.toJson())
-            .toList(growable: false)),
+        jsonEncode(Build(
+          implementations: implementations,
+          services: discoveredServices,
+        )),
       );
     }
   }

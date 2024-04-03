@@ -1,6 +1,9 @@
 import 'package:depi/depi.dart';
 
 import '../services/abstract_service.dart';
+import '../services/auth_service.dart';
+import '../services/auth_service_impl.dart';
+import '../services/auth_service_mock.dart';
 import '../services/extended_class.dart';
 import '../services/options_dependency.dart';
 import '../services/single_class.dart';

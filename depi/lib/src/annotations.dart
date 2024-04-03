@@ -20,7 +20,10 @@ final class Implementation {
   /// The list of environments where this implementation is injected
   final Set<String> environments;
 
-  const Implementation({required this.environments});
+  /// The service type this is an implementation for.
+  final Type? service;
+
+  const Implementation({required this.environments, this.service});
 }
 
 /// An annotation used in the class that will be the dependency container

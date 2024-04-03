@@ -1,6 +1,6 @@
 name: depi_generator
 description: The code generator for the depi dependency injection library.
-version: 1.0.1
+version: 1.0.2
 repository: https://github.com/tomasweigenast/depi
 issues: https://github.com/tomasweigenast/depi/issues
 
@@ -11,7 +11,7 @@ dependencies:
   analyzer: ^6.4.1
   build: ^2.4.1
   dart_style: ^2.3.6
-  depi: ^1.1.0
+  depi: ^1.1.2
   glob: ^2.1.2
   lints: ^3.0.0
   path: ^1.9.0

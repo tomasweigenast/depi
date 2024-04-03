@@ -4,10 +4,12 @@ part of 'service_collection.dart';
 
 abstract base class _$MyServiceCollection extends ServiceCollection {
   _$MyServiceCollection._development() {
+    putSingleton<AuthService>((services) => MockAuthService());
     putTransient<AbstractService>((services) => ConcreteB());
     putSingleton<ServiceD>((services) => ServiceDImplementation());
   }
   _$MyServiceCollection._production() {
+    putSingleton<AuthService>((services) => ProductionAuthService());
     putTransient<AbstractService>((services) => ConcreteA());
     putSingleton<ServiceB>((services) => ServiceBImplementation());
     putSingleton<ServiceE>((services) => ServiceE());

@@ -1,3 +1,7 @@
+## 1.1.2
+
+- Add `service` in the `Implementation` annotation.
+
 ## 1.1.1
 
 - Migrated to `lints` lint package.

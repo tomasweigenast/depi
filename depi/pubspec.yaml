@@ -1,6 +1,6 @@
 name: depi
 description: Dart and Flutter efficient dependency injection library with code generation
-version: 1.1.1
+version: 1.1.2
 repository: https://github.com/tomasweigenast/depi
 issues: https://github.com/tomasweigenast/depi/issues
 
